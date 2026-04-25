@@ -1,3 +1,29 @@
+/* Toast notification */
+.toast {
+    position: fixed;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(50, 50, 70, 0.95);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 2000;
+    white-space: nowrap;
+    max-width: calc(100vw - 40px);
+    text-align: center;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -36,31 +62,35 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     min-height: 100vh;
+    min-height: 100dvh;
     padding: 20px;
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
     transition: background 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background: var(--card-bg);
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px var(--shadow-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    z-index: 1000;
+    font-size: 1.6rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .theme-toggle:hover {
     transform: scale(1.1) rotate(15deg);
+    background: rgba(255, 255, 255, 0.3);
     box-shadow: 0 6px 16px var(--shadow-hover);
 }
 
@@ -74,14 +104,26 @@ body {
 }
 
 header {
-    text-align: center;
     color: var(--text-light);
     margin-bottom: 30px;
 }
 
-header h1 {
-    font-size: 2.5rem;
+.header-top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     margin-bottom: 10px;
+}
+
+.header-top .theme-toggle {
+    grid-column: 3;
+    justify-self: end;
+}
+
+header h1 {
+    grid-column: 2;
+    font-size: 2.5rem;
+    text-align: center;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     cursor: text;
     padding: 5px 10px;
@@ -101,6 +143,7 @@ header h1:focus {
 .date {
     font-size: 1.1rem;
     opacity: 0.9;
+    text-align: center;
 }
 
 .add-habit-section {
@@ -111,6 +154,7 @@ header h1:focus {
 
 #habitInput {
     flex: 1;
+    min-width: 0;
     padding: 15px;
     font-size: 1rem;
     border: none;
@@ -406,18 +450,104 @@ body.dark-mode .notes-icon {
 }
 
 @media (max-width: 600px) {
-    header h1 {
-        font-size: 2rem;
+    header {
+        margin-bottom: 20px;
     }
-    
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .date {
+        font-size: 0.95rem;
+    }
+
+    .theme-toggle {
+        width: 44px;
+        height: 44px;
+        font-size: 1.3rem;
+    }
+
+    .add-habit-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #habitInput {
+        width: 100%;
+        font-size: 16px; /* prevents iOS zoom on focus */
+        padding: 14px 16px;
+    }
+
+    #addHabitBtn {
+        width: 100%;
+        padding: 14px;
+        font-size: 1rem;
+    }
+
     .habit-card {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        padding: 16px;
+        gap: 12px;
     }
-    
+
+    .habit-name {
+        font-size: 1.15rem;
+    }
+
     .habit-actions {
         width: 100%;
-        margin-top: 15px;
-        justify-content: center;
+        margin-top: 0;
+        justify-content: space-around;
+        padding-top: 12px;
+        border-top: 1px solid rgba(0,0,0,0.07);
+    }
+
+    body.dark-mode .habit-actions {
+        border-top-color: rgba(255,255,255,0.08);
+    }
+
+    .check-icon, .delete-icon, .notes-icon {
+        width: 54px;
+        height: 54px;
+        font-size: 1.6rem;
+    }
+
+    .streak-display {
+        width: 54px;
+        height: 54px;
+    }
+
+    .notes-textarea {
+        font-size: 16px; /* prevents iOS zoom */
+    }
+
+    .empty-state {
+        margin-top: 30px;
+        font-size: 1rem;
+    }
+}
+
+/* Touch active states — replaces hover on mobile */
+@media (hover: none) {
+    .habit-card:hover {
+        transform: none;
+        box-shadow: 0 4px 6px var(--shadow-color);
+    }
+
+    .check-icon:active,
+    .delete-icon:active,
+    .notes-icon:active {
+        transform: scale(0.92);
+        opacity: 0.8;
+    }
+
+    #addHabitBtn:active {
+        transform: scale(0.97);
+    }
+
+    .theme-toggle:active {
+        transform: scale(0.92);
     }
 }

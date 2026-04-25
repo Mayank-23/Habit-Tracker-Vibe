@@ -4,6 +4,7 @@ class HabitTracker {
         this.habits = this.loadData();
         this.darkMode = this.loadTheme();
         this.appTitle = this.loadTitle();
+        this._toastTimer = null;
         this.init();
     }
 
@@ -13,6 +14,14 @@ class HabitTracker {
         this.applyTheme();
         this.applyTitle();
         this.render();
+    }
+
+    showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
     loadTitle() {
@@ -108,12 +117,12 @@ class HabitTracker {
         const habitName = input.value.trim();
 
         if (!habitName) {
-            alert('Please enter a habit name!');
+            this.showToast('Please enter a habit name!');
             return;
         }
 
         if (this.habits[habitName]) {
-            alert('This habit already exists!');
+            this.showToast('This habit already exists!');
             return;
         }
 
@@ -125,6 +134,7 @@ class HabitTracker {
 
         this.saveData();
         input.value = '';
+        input.blur(); // dismiss keyboard on mobile
         this.render();
     }
 
@@ -146,11 +156,35 @@ class HabitTracker {
     }
 
     deleteHabit(habitName) {
-        if (confirm(`Delete habit "${habitName}"?`)) {
+        // Use a custom inline confirm via toast-style modal on mobile
+        const card = document.querySelector(`[data-habit="${CSS.escape(habitName)}"]`);
+        if (!card) return;
+
+        // If already in confirm state, proceed with delete
+        if (card.dataset.confirmDelete === 'true') {
             delete this.habits[habitName];
             this.saveData();
             this.render();
+            return;
         }
+
+        // First tap: show confirmation state
+        card.dataset.confirmDelete = 'true';
+        const deleteBtn = card.querySelector('.delete-icon');
+        deleteBtn.textContent = '?';
+        deleteBtn.style.background = '#f44336';
+        deleteBtn.style.color = 'white';
+        this.showToast('Tap ✕ again to delete');
+
+        // Auto-reset after 3 seconds
+        setTimeout(() => {
+            if (card && card.dataset.confirmDelete === 'true') {
+                card.dataset.confirmDelete = 'false';
+                deleteBtn.textContent = '✕';
+                deleteBtn.style.background = '';
+                deleteBtn.style.color = '';
+            }
+        }, 3000);
     }
 
     saveNotes(habitName) {
@@ -242,6 +276,7 @@ class HabitTracker {
 
             const card = document.createElement('div');
             card.className = `habit-card ${completedToday ? 'completed' : ''}`;
+            card.dataset.habit = habitName;
 
             const createdDate = new Date(habit.createdDate);
             const formattedDate = createdDate.toLocaleDateString('en-US', { 
