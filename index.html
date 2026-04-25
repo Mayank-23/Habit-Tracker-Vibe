@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Habit Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <div class="container">
+        <header>
+            <h1 id="appTitle" contenteditable="true" spellcheck="false">🎯 Daily Habit Tracker</h1>
+            <p class="date" id="currentDate"></p>
+        </header>
+
+        <div class="add-habit-section">
+            <input type="text" id="habitInput" placeholder="Enter a new habit..." />
+            <button id="addHabitBtn">Add Habit</button>
+        </div>
+
+        <div id="habitsContainer" class="habits-container">
+            <!-- Habits will be dynamically added here -->
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <p>No habits yet. Add one above to get started! 🚀</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
